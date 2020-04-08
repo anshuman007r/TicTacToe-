@@ -32,7 +32,7 @@ class App extends React.Component {
     const current=history[history.length-1];
     const squares=current.squares.slice();
  
-    if(calculateWinner(squares) || squares[i])
+    if(calculateWinner(squares)[0] || squares[i])
     {
       return
     }
@@ -61,7 +61,7 @@ class App extends React.Component {
           break;        
          }
       }
-      
+
       let lastUpdate='Last move row:'+row+ ' col:'+col;
       this.setState({text:lastUpdate})
     }
@@ -99,19 +99,20 @@ class App extends React.Component {
 
   }
   calculateStatus = (squares) => {
-    let status=null;
+    let status=[];
     const winner =calculateWinner(squares);
-    if(winner)
+    if(winner[0])
     {
-      status='Winner:'+winner;
+      status.push('Winner:'+winner[0]);
+      status.push(winner[1]);
     }
     else if(this.state.stepNumber===9)
     {
-      status='Draw';
+      status.push('Draw');
     }
-    else if(!winner && this.state.stepNumber<9)
+    else if(!winner[0] && this.state.stepNumber<9)
     {
-      status='Player'+(this.state.xIsNext? ` ${MOVE_X}`: ` ${MOVE_O}`)+' it your turn';
+      status.push('Player'+(this.state.xIsNext? ` ${MOVE_X}`: ` ${MOVE_O}`)+' it your turn');
 
     }
 
@@ -158,7 +159,16 @@ class App extends React.Component {
   render() {
     const historyCopy= this.state.history.slice();
     const current=historyCopy[this.state.stepNumber];
-    const status = this.calculateStatus(current.squares) ;
+    let [status,indexs] = this.calculateStatus(current.squares);
+    if(status === 'Winner:X' || status === 'Winner:O' )
+    {
+      let squares=current.squares.slice();
+      for(let update=0;update<indexs.length;update++)
+      {
+        squares[indexs[update]]=<b>{squares[indexs[update]]}</b>;
+      }
+      current.squares=squares;
+    }
 
     return (
       <div className="game">
